@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv"
+import dotenv from "dotenv"   // agrego variable de entorno virtual
 
 dotenv.config()
 // acordate de pasarlo a env
