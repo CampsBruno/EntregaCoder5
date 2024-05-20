@@ -24,7 +24,7 @@ const createcartcrdb =async (data)=>{
 const addProducttoCartBd = async (cid,pid)=>{
    try{ 
         const product = await productModel.findById(pid);
-        console.log(product)
+        
         if(!product) return {
             product: false
         }
@@ -38,11 +38,21 @@ const addProducttoCartBd = async (cid,pid)=>{
         }
 
         
-
+    return cart
    } catch(error){console.log(error)}
-    
+};
 
-}
+// borrar carrito
+const deleteCartbyidBd = async (cid)=>{
+    const  cart= await cartsModel.deleteOne({_id:cid})
+    console.log(cart)
+    if(cart.deletedCount===0) return false
+    return true
+};
+
+
+
+
 
 
 export default {
@@ -50,5 +60,6 @@ export default {
     getcartsbyidDb,
     createcartcrdb,
     addProducttoCartBd,
+    deleteCartbyidBd,
  
 }

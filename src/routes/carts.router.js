@@ -62,14 +62,27 @@ router.post("/:cid/product/:pid", async(req,res)=>{
         try{
             const {cid, pid} = req.params
             const cart = await cartDao.addProducttoCartBd(cid, pid);
-            if(!cart.product) return res.status(404).json({status: "Error", msg: `No se encontro el producto con id ${pid} `})
-            if(!cart.cart) return res.status(404).json({status: "Error", msg: `No se encontro el carrito con id ${cid} `})
+            console.log(cart)
+            if(cart.product=== false) return res.status(404).json({status: "Error", msg: `No se encontro el producto con id ${pid} `})
+            if(cart.cart === false) return res.status(404).json({status: "Error", msg: `No se encontro el carrito con id ${cid} `})
 
-            res.status(201).json(cart);
+            res.status(201).json({status:"succes", payload:cart});
 
         }catch(error){console.log(error)}
 
 });
+
+
+//borrar carrito 
+router.delete("/:cid", async (req,res)=>{
+    const {cid} = req.params
+    const cart = await cartDao.deleteCartbyidBd(cid) // pasa como string caminando
+    if(!cart) return res.status(404).json({status:"error", msg: `No se encuentra carrito con el id ${cid}`})
+    
+        res.status(202).json({status:"Exito", msg:`Carritop con id ${pid} eliminado exitosamente`})
+    })
+
+
 
 
 
