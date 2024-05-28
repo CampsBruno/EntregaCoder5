@@ -11,17 +11,17 @@ const router= Router();
 
 router.get("/", async (req,res)=>{
     try{
-      //File sistem
-                 //const {limit} = req.query;  // desesctructuramos la query que viene con el vcalor de limit de Filesistem
-                // const products = await productManager.getProducts();
-    //----------------------------------   Mongo ----------------------------------------------------
     
-    const products = await productDao.getProductsDb()
+    const queryParams = req.query; // toma todas las querys para enviarlas y filtrarlas en el dao
+    
+    
+    const products = await productDao.getProductsDb(queryParams)
 
     res.status(200).json({status: "succes", payload: products});
 
     }catch(error){
         console.log(error);
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
 }});
 
 
@@ -32,10 +32,6 @@ router.get("/", async (req,res)=>{
 
 router.get("/:pid", async (req,res)=>{
     try{
-                    //const {pid} = req.params;
-                    // obrengo los parametros de la ruta, en este caso el /products/:PID el pid
-                    //const products =await productManager.getProductById(pid)  // await clave para que lo devuelva
-   //----------------------------------   Mongo ---------------------------------------------------- 
 
         const {pid} = req.params;
         const product = await productDao.getproductsbyidDb(pid)
@@ -45,6 +41,7 @@ router.get("/:pid", async (req,res)=>{
         res.status(200).json({status: "succes", payload: product})
     }catch(error){
             console.log(error);
+            res.status(500).json({status:"Error", msg:"Error del Servidor"})
     };
 })
 
@@ -56,10 +53,6 @@ router.get("/:pid", async (req,res)=>{
 
 router.post("/", async (req,res)=>{
     try{
-                            // const producto = req.body
-                            // const validador = await productManager.addProduct(producto)
-                            // if(validador) { res.status(200).json(producto)} else {res.status(401).json({message: "Todos los campos del producto son obligatorios o Ya existe el codigo del producto"})}
-//----------------------------------   Mongo ----------------------------------------------------
 
        const producto = req.body
        const validador = await productDao.createproducrdb(producto)
@@ -67,6 +60,7 @@ router.post("/", async (req,res)=>{
       
     }catch (error){
         console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
     }
 });
 
@@ -78,10 +72,8 @@ router.post("/", async (req,res)=>{
 
 router.delete("/:pid", async (req,res)=>{
     try{
-                                //const {pid} = req.params
-                                //const deleteProduct = productManager.deleteProduct(pid)
-//----------------------------------   Mongo ----------------------------------------------------
-       
+
+    
         const {pid} = req.params
         const deleteProduct = await productDao.deleteOneDb(pid)
        
@@ -91,6 +83,7 @@ router.delete("/:pid", async (req,res)=>{
 
     }catch(error){
         console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
     }
 });
 
@@ -104,11 +97,7 @@ router.delete("/:pid", async (req,res)=>{
 
 router.put("/:pid", async (req,res)=>{
     try{
-                     //const {pid} = req.params
-                     //const producto = req.body;
-                     //const updateProduct =  await productManager.updateproduct(pid, producto)
-//----------------------------------   Mongo ----------------------------------------------------
-    
+
     const {pid} = req.params
     const productdata = req.body;
     const updateProduct =  await productDao.updateDb(pid, productdata)
@@ -116,6 +105,7 @@ router.put("/:pid", async (req,res)=>{
     res.status(201).json({status: "Producto modificado con exito", payload: updateProduct})
     }catch(error){
         console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
     }
 
 });

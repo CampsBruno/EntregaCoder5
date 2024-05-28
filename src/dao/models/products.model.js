@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import  mongoosePaginate from "mongoose-paginate-v2";
+
 
 const productColection = "products"
 
@@ -31,6 +33,13 @@ const prodcutsSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
+    category:{
+        type: String,
+        require:true,
+    }
 });
+
+
+prodcutsSchema.plugin(mongoosePaginate);
 
 export const productModel= mongoose.model(productColection,prodcutsSchema)

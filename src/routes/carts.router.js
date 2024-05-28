@@ -24,6 +24,7 @@ router.post("/", async (req,res)=>{
 
     }catch(error){
         console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
     }
 });
 
@@ -33,11 +34,10 @@ router.post("/", async (req,res)=>{
 router.get("/", async (req , res)=>{
     try{    
             const carts = await cartDao.getcartsDb()
-
             res.status(200).json({status: "Succes", payload:carts})
-
     }catch(error){
-        console.log(error)}
+        console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})}
 })
 
 
@@ -45,14 +45,13 @@ router.get("/", async (req , res)=>{
 router.get("/:cid", async(req,res)=>{
     try{
         const {cid} = req.params
-
         const cart = await cartDao.getcartsbyidDb(cid)
         if(!cart) return res.status(404).json({status:"Error",message:`No existe el carrito con el ID ${cid}` })
-
         res.status(200).json({status: "Succes", payload:cart})
 
     }catch(erro){
-        console.log(erro)}
+        console.log(erro)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})}
 });
 
 
@@ -68,19 +67,51 @@ router.post("/:cid/product/:pid", async(req,res)=>{
 
             res.status(201).json({status:"succes", payload:cart});
 
-        }catch(error){console.log(error)}
+        }catch(error){console.log(error)
+            res.status(500).json({status:"Error", msg:"Error del Servidor"})
+        }
 
 });
 
 
+
+// Borrar Productos del carrito
+router.delete("/:cid/product/:pid", async(req,res)=>{
+    try{
+        const {cid, pid} = req.params
+        const cart = await cartDao.deleteProductfromCartDb(cid, pid);
+        
+        if(cart.product=== false) return res.status(404).json({status: "Error", msg: `No se encontro el producto con id ${pid} `})
+        //if(cart.cart === false) return res.status(404).json({status: "Error", msg: `No se encontro el carrito con id ${cid} `})
+
+        res.status(201).json({status:"succes", payload:cart});
+
+    }catch(error){console.log(error)
+        res.status(500).json({status:"Error", msg:"Error del Servidor"})
+    }
+
+});
+
+
+
+
+
+
+
+
 //borrar carrito 
 router.delete("/:cid", async (req,res)=>{
+   try{
     const {cid} = req.params
     const cart = await cartDao.deleteCartbyidBd(cid) // pasa como string caminando
     if(!cart) return res.status(404).json({status:"error", msg: `No se encuentra carrito con el id ${cid}`})
     
         res.status(202).json({status:"Exito", msg:`Carritop con id ${pid} eliminado exitosamente`})
-    })
+}catch(error){console.log(error)
+    res.status(500).json({status:"Error", msg:"Error del Servidor"})
+}
+   
+    });
 
 
 
