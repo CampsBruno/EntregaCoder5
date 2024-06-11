@@ -34,9 +34,6 @@ const getProductsDb = async(queries)=>{
 
 
 
-
-
-
 //obtengo  productos po ID de la base de datos
 const getproductsbyidDb = async (id)=>{
     const products = await productModel.findById(id);

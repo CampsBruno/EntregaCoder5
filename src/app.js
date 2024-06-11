@@ -2,6 +2,14 @@ import express from "express";
  import productManager from "./dao/fsManagers/productManager.js";
 import router from "./routes/index.js"
 import {conectMongoDB} from "./config/mongoDB.config.js"
+import session  from "express-session"
+import MongoStore from "connect-mongo";
+import dotenv from "dotenv"   // agrego variable de entorno virtual
+
+dotenv.config()
+// acordate de pasarlo a env
+const dataBase = process.env.DB_URL
+
 
 
 conectMongoDB();
@@ -13,7 +21,14 @@ const port= 8080
 // Midellwares
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-
+app.use(session({
+    store: MongoStore.create({  // acordate de importarlo despues de variable de entorno
+        mongoUrl: dataBase,
+        ttl: 100
+    }),
+    secret: "SDvklojdfoip34",
+    resave:true
+}));
 
 
 
