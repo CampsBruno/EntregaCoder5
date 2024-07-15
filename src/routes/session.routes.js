@@ -1,16 +1,64 @@
 import { Router } from "express";
 import userDao from "../dao/mongoDao/user.dao.js";
+import { createHash, isValiPassword } from "../utils/hasPassword.js"
+import passport from "passport";
+import { createToken, verifyToken } from "../utils/jwt.js";
 
 const router= Router()
 
-router.post("/register", async(req,res)=>{
+
+
+router.post("/register",passport.authenticate("register") ,async(req,res)=>{
     try{
-        const userData =  req.body;
-        const newUser= await userDao.createUserdb(userData)
+        res.status(201).json({status:"Success", message:"Usuario Creado"})
+    
+    }catch(error){console.log(error)
+    res.status(500).json({status:"Error",message:"Internal Server Error"})
+    }
+})
+
+
+
+
+//como en register agrego el midelware de  passport
+router.post("/login", passport.authenticate("login"),async(req,res)=>{ // acordate que llamaste la funcion login
+    try{
+         return res.status(201).json({status: "Succes", payload: req.user})
+    }catch(error){console.log(error)
+    res.status(500).json({status:"Error",message:"Internal Server Error"})
+    }
+})
+
+
+
+//como en register agrego el midelware de  passport
+router.get("/google", passport.authenticate("google", 
+    {scope: ["https://www.googleapis.com/auth/userinfo.email", 
+        "https://www.googleapis.com/auth/userinfo.profile"],   // de aca obtierne los datos
+         session: false}),async(req,res)=>{ // acordate que llamaste la funcion login
+
+    try{
+         return res.status(201).json({status: "Succes", payload: req.user})
+    }catch(error){console.log(error)
+    res.status(500).json({status:"Error",message:"Internal Server Error"})
+
+    }
+})
+
+
+//ruta de JWT
+router.post("/jwt", async(req,res)=>{ 
+       try{
         
+        const { email, password }= req.body;
+        const user= await userDao.getusersbyemailDb(email)
+        if(!user  ||  !isValiPassword(user, password)) return res.status(401).json({status:"Error", msg:"Email o contraseña invalida"})
 
-        if(!newUser){res.status(400).json({status:"Error", msg:"no se pudo crear el usuario"})}
-        res.status(201).json({status:"Success", payload: newUser})
+        const token =  createToken(user)   // el token que le devolvemos al usuario tiene cifrada su email y contraseña
+        //guardar token en coockie
+        res.cookie("token", token, { httpOnly: true })// lo de httpOnly nos dice que la cookie solo va a estar disponible en peticion http
+
+         return res.status(201).json({status: "Succes", payload: user, token})
     
     }catch(error){console.log(error)
     res.status(500).json({status:"Error",message:"Internal Server Error"})
@@ -19,36 +67,24 @@ router.post("/register", async(req,res)=>{
 
 
 
-
-router.post("/login", async(req,res)=>{
+// Chekeo de token
+router.get("/current", (req,  res)=>{
     try{
-       const { email,password } = req.body
-    
-       if(email === "adminCoder@coder.com" && password ==="adminCod3r123"  ){ // siendo el usuario coderer, entra como admin
-             req.session.user= {
-                    email,
-                    role: "admin",
-             }   
-             return res.status(201).json({status: "Succes", payload: req.session.user})
-       
-            }
-            // si no es admin
-            const user = await userDao.getusersbyemailDb(email)
+        const token = req.cookies.token;
+        const checkToken = verifyToken(token);
 
-            // si no hay usuario, o no conicide la constraseña 
-            if(!user || user.password !== password){return res.status(401).json({status:"Error", message: "Usuario o Contraseña incorrectos"})}
-            
+        if(!checkToken) return res.status(403).json({status:"Error", msg:"invalid Token"});
 
-            req.session.user = {
-                email,
-                role: "user",
-            }
+            return res.status(201).json({status: "Succes", payload: checkToken});
 
-            res.status(200).json({status:"Success", payload: req.session.user})
     }catch(error){console.log(error)
-    res.status(500).json({status:"Error",message:"Internal Server Error"})
-    }
-})
+        res.status(500).json({status:"Error",message:"Internal Server Error"});
+        }
+
+});
+
+
+
 
 
 router.get("/logout", async (req,res)=>{
